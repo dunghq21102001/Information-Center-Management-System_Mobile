@@ -13,6 +13,8 @@ import Schedule from "./src/Screens/Schedule";
 import Password from "./src/Screens/Password";
 import Children from "./src/Screens/Children";
 import Equipment from "./src/Screens/Equipment";
+import EquipmentDetail from "./src/Screens/EquipmentDetail";
+import CameraScan from './src/Screens/CameraScan'
 
 const Tab = createBottomTabNavigator();
 
@@ -50,7 +52,10 @@ export default function App() {
     <View style={styles.container}>
       <NavigationContainer ref={navigationContainerRef}>
         {isLoggedIn ? (
-          <Tab.Navigator tabBar={(props) => <TabBar {...props} />}>
+          <Tab.Navigator screenOptions={{
+            headerShown: false
+          }}
+            tabBar={(props) => <TabBar {...props} />}>
             <Tab.Screen name="Home">
               {(props) => <Home {...props} />}
             </Tab.Screen>
@@ -61,7 +66,9 @@ export default function App() {
             </Tab.Screen>
             <Tab.Screen name="Security" component={Password} />
             <Tab.Screen name="Children" component={Children} />
+            <Tab.Screen name="Equipment Detail" component={EquipmentDetail} />
             <Tab.Screen name="Profile Detail" component={ProfileDetail} />
+            <Tab.Screen name="CameraScan" component={CameraScan} />
           </Tab.Navigator>
         ) : (
           <Login setIsLoggedIn={setIsLoggedIn} />

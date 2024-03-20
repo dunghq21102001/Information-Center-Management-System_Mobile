@@ -47,6 +47,7 @@ const Password = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={{fontSize: 24, fontWeight: 'bold', marginBottom: 30 }}>Bảo mật</Text>
       <Text style={styles.label}>Current Password</Text>
       <TextInput
         style={styles.input}

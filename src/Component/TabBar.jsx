@@ -71,7 +71,9 @@ function TabBar({ state, descriptors, navigation }) {
             style={
               label != "Profile Detail" &&
               label != "Security" &&
-              label != "Children"
+              label != "Children" &&
+              label != "Equipment Detail" &&
+              label != 'CameraScan'
                 ? { flex: 1, alignItems: "center" }
                 : { flex: 1, alignItems: "center", display: "none" }
             }

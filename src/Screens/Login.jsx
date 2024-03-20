@@ -17,7 +17,7 @@ const Login = ({ navigation, setIsLoggedIn }) => {
         .then((res) => {
           AsyncStorage.setItem("userData", JSON.stringify(res.data));
           AsyncStorage.setItem("isLoggedIn", "true");
-          func.showMess("success", "Login successfully");
+          func.showMess("success", "Đăng nhập thành công");
           setIsLoggedIn(true);
         })
         .catch((err) => {

@@ -12,11 +12,16 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import Modal from "react-native-modal";
 import API from "../API";
-const Equipment = () => {
-  // const [searchQuery, setSearchQuery] = useState("");
+import func from "../common/func";
+import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
+
+const Equipment = ({ navigation, route }) => {
   const [originalEquipmentList, setOriginalEquipmentList] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
+  const [isShowModal, setIsShowModal] = useState(false);
 
   useEffect(() => {
     fetchEquipment();
@@ -30,6 +35,11 @@ const Equipment = () => {
       })
       .catch((err) => {});
   };
+
+  const convertVND = (price) => {
+    return func.convertVND(price);
+  };
+
   const handleSearch = (text) => {
     if (text === "") {
       setEquipmentList(originalEquipmentList);
@@ -43,12 +53,43 @@ const Equipment = () => {
     }
   };
 
-  const selectChild = (item) => {
-    console.log(item);
+  const selectItem = (item) => {
+    navigation.navigate("Equipment Detail", { data: item?.id });
+  };
+
+  const goToCreate = () => {
+    navigation.navigate("CameraScan");
   };
   return (
     <View style={styles.container}>
-      <Text style={{ marginLeft: 20, fontSize: 18 }}>Filter</Text>
+      <Text
+        style={{
+          marginLeft: 20,
+          fontSize: 24,
+          fontWeight: "bold",
+          marginBottom: 30,
+        }}
+      >
+        Trang thiết bị
+      </Text>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
+        <Text style={{ marginLeft: 20, fontSize: 18 }}>Tìm kiếm</Text>
+        <AntDesign
+          name="scan1"
+          size={24}
+          color="black"
+          onPress={goToCreate}
+          style={{ marginRight: 20 }}
+        />
+      </View>
       <TextInput
         placeholder="Equipment's name, Ex: Television"
         onChangeText={(newText) => handleSearch(newText)}
@@ -62,13 +103,16 @@ const Equipment = () => {
         }}
       />
       <View style={{ width: wp("100%") }}>
+        <Text style={{ marginLeft: 20, fontSize: 16, marginTop: 30 }}>
+          Danh sách trang thiết bị
+        </Text>
         <FlatList
           style={{ width: wp("100%"), height: hp("75%") }}
           data={equipmentList}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                selectChild(item);
+                selectItem(item);
               }}
               style={styles.item}
             >
@@ -77,21 +121,32 @@ const Equipment = () => {
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                <Image
-                  style={{ width: 50, height: 50, borderRadius: 50 }}
-                  source={{
-                    uri: item?.image,
-                  }}
-                />
-                <Text style={{ marginLeft: 10 }}>{item?.name}</Text>
+                <Text>{item?.name}</Text>
               </View>
-              <Text>{item?.age} years old</Text>
+              <Text style={{ fontSize: 10 }}>
+                {convertVND(item?.price)} &ensp; - &ensp;
+                {item?.status == "Borrowed"
+                  ? "Đang mượn"
+                  : item?.status == "Returned"
+                  ? "Trong kho"
+                  : item?.status == "Repair"
+                  ? "Đang sửa"
+                  : "Lỗi"}
+              </Text>
             </TouchableOpacity>
           )}
         />
       </View>
+
+      {/* modal */}
+      <Modal isVisible={isShowModal}>
+        <View style={{ flex: 1 }}>
+          <Text>I am the modal content!</Text>
+        </View>
+      </Modal>
     </View>
   );
 };

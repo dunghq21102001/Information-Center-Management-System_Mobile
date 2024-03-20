@@ -5,7 +5,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const Home = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
-      <Text>Home</Text>
+      <Text style={{ marginLeft: 20, fontSize: 24, fontWeight: "bold", marginBottom: 30 }}>
+        Trang chủ
+      </Text>
     </View>
   );
 };

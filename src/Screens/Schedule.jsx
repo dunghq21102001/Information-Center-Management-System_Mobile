@@ -45,13 +45,48 @@ const Schedule = () => {
     // }, 1000);
     setItems({
       "2024-02-26": [
-        { day: "2024-02-26", height: 50, status: "Absent", startTime: '7:30', endTime: '11:30',name: "Toan" },
-        { day: "2024-02-26", height: 50, status: "Attendance", startTime: '7:30', endTime: '11:30',name: "Toan 2" },
-        { day: "2024-02-26", height: 101, status: "Attendance", startTime: '7:30', endTime: '11:30',name: "Dia" },
+        {
+          day: "2024-02-26",
+          height: 50,
+          status: "Absent",
+          startTime: "7:30",
+          endTime: "11:30",
+          name: "Toan",
+        },
+        {
+          day: "2024-02-26",
+          height: 50,
+          status: "Attendance",
+          startTime: "7:30",
+          endTime: "11:30",
+          name: "Toan 2",
+        },
+        {
+          day: "2024-02-26",
+          height: 101,
+          status: "Attendance",
+          startTime: "7:30",
+          endTime: "11:30",
+          name: "Dia",
+        },
       ],
       "2024-02-27": [
-        { day: "2024-02-27", height: 107, status: "Attendance", startTime: '7:30', endTime: '11:30',name: "Van" },
-        { day: "2024-02-27", height: 72, status: "Attendance", startTime: '7:30', endTime: '11:30',name: "Anh" },
+        {
+          day: "2024-02-27",
+          height: 107,
+          status: "Attendance",
+          startTime: "7:30",
+          endTime: "11:30",
+          name: "Van",
+        },
+        {
+          day: "2024-02-27",
+          height: 72,
+          status: "Attendance",
+          startTime: "7:30",
+          endTime: "11:30",
+          name: "Anh",
+        },
       ],
       "2024-02-28": [],
       "2024-02-29": [],
@@ -70,7 +105,9 @@ const Schedule = () => {
         onPress={() => Alert.alert(reservation?.name)}
       >
         <Text>{reservation?.name}</Text>
-        <Text>{reservation?.startTime} - {reservation?.endTime}</Text>
+        <Text>
+          {reservation?.startTime} - {reservation?.endTime}
+        </Text>
         <Text
           style={[
             reservation?.status.toLowerCase() == "attendance"
@@ -85,14 +122,27 @@ const Schedule = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <Agenda
-        items={items}
-        minDate={"2024-02-01"}
-        maxDate={"2024-02-29"}
-        loadItemsForMonth={loadItems}
-        renderItem={renderItem}
-      ></Agenda>
+    <View style={styles.container}>
+      <Text
+        style={{
+          marginLeft: 20,
+          fontSize: 24,
+          fontWeight: "bold",
+          marginBottom: 30,
+        }}
+      >
+        Lịch học
+      </Text>
+
+      <View style={{ flex: 1 }}>
+        <Agenda
+          items={items}
+          minDate={"2024-02-01"}
+          maxDate={"2024-02-29"}
+          loadItemsForMonth={loadItems}
+          renderItem={renderItem}
+        ></Agenda>
+      </View>
     </View>
   );
 };
@@ -100,6 +150,11 @@ const Schedule = () => {
 export default Schedule;
 
 const styles = StyleSheet.create({
+  container: {
+    width: wp("100%"),
+    height: hp("100%"),
+    backgroundColor: "#ffffff",
+  },
   item: {
     backgroundColor: "white",
     flex: 1,
