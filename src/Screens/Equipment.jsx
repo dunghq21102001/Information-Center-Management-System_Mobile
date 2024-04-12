@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  PanResponder,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -17,23 +18,32 @@ import API from "../API";
 import func from "../common/func";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const Equipment = ({ navigation, route }) => {
   const [originalEquipmentList, setOriginalEquipmentList] = useState([]);
   const [equipmentList, setEquipmentList] = useState([]);
   const [isShowModal, setIsShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [showReloadIcon, setShowReloadIcon] = useState(false);
+  const [reloadIconPosition, setReloadIconPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     fetchEquipment();
   }, []);
 
   const fetchEquipment = () => {
+    setLoading(true);
     API.getEquipment()
       .then((res) => {
+        setLoading(false);
         setEquipmentList(res.data);
         setOriginalEquipmentList(res.data);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setLoading(false);
+      });
   };
 
   const convertVND = (price) => {
@@ -53,6 +63,26 @@ const Equipment = ({ navigation, route }) => {
     }
   };
 
+  const panResponder = React.useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (event) => {
+        setIsSwiping(true);
+        setShowReloadIcon(true);
+        // const { moveX, moveY } = event.nativeEvent;
+        // const x = Number(moveX);
+        // const y = Number(moveY);
+        // setReloadIconPosition({ x: x - 27, y: y - 27 });
+      },
+      onPanResponderRelease: () => {
+        setIsSwiping(false);
+        fetchEquipment();
+        setShowReloadIcon(false);
+        // setReloadIconPosition({ x: 0, y: 0 });
+      },
+    })
+  ).current;
+
   const selectItem = (item) => {
     navigation.navigate("Equipment Detail", { data: item?.id });
   };
@@ -61,7 +91,12 @@ const Equipment = ({ navigation, route }) => {
     navigation.navigate("CameraScan");
   };
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...panResponder.panHandlers}>
+      <Spinner
+        visible={loading}
+        textContent={"Đang tải..."}
+        textStyle={styles.spinnerTextStyle}
+      />
       <Text
         style={{
           marginLeft: 20,
@@ -91,7 +126,7 @@ const Equipment = ({ navigation, route }) => {
         />
       </View>
       <TextInput
-        placeholder="Equipment's name, Ex: Television"
+        placeholder="Tên thiết bị, ví dụ: Tivi"
         onChangeText={(newText) => handleSearch(newText)}
         style={{
           width: wp("100%"),
@@ -102,7 +137,7 @@ const Equipment = ({ navigation, route }) => {
           paddingVertical: 10,
         }}
       />
-      <View style={{ width: wp("100%") }}>
+      <View style={{ width: wp("100%"), position: "relative" }}>
         <Text style={{ marginLeft: 20, fontSize: 16, marginTop: 30 }}>
           Danh sách trang thiết bị
         </Text>
@@ -139,6 +174,11 @@ const Equipment = ({ navigation, route }) => {
             </TouchableOpacity>
           )}
         />
+        {showReloadIcon && (
+          <View style={[styles.reloadIconContainer]}>
+            <Ionicons name="reload" size={54} color="black" />
+          </View>
+        )}
       </View>
 
       {/* modal */}
@@ -170,5 +210,15 @@ const styles = StyleSheet.create({
     borderBottomColor: "#edf1f3",
     borderBottomWidth: 2,
     borderStyle: "solid",
+  },
+  spinnerTextStyle: {
+    color: "#ffffff",
+  },
+  reloadIconContainer: {
+    position: "relative",
+    bottom: "90%",
+    left: "50%",
+    transform: [{ translateX: -12 }],
+    zIndex: 999,
   },
 });

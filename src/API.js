@@ -23,6 +23,10 @@ export default class API {
         return axios.post(`${this.BASE_URL}/Equipment/EquipmentBorrowedManagement`, data)
     }
 
+    static returnEquipment(data) {
+        return axios.post(`${this.BASE_URL}/Equipment/EquipmentReturnedManagement`, data)
+    }
+
     static getTeacherList() {
         return axios.get(`${this.BASE_URL}/User/UserByRoleId/d5fa55c7-315d-4634-9c73-08dbbc3f3a53`)
     }

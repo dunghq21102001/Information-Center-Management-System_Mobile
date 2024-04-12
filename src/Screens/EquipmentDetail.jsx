@@ -14,31 +14,35 @@ import {
 import func from "../common/func";
 import API from "../API";
 import { SelectList } from "react-native-dropdown-select-list";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const EquipmentDetail = ({ navigation, route }) => {
   const { data } = route.params;
   const [productDetail, setProductDetail] = useState(null);
   const [teachers, setTeachers] = useState([]);
   const [selected, setSelected] = React.useState("");
+  const [selectedDate, setSelectedDate] = React.useState("");
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   useEffect(() => {
     fetchEquipment();
     cancelAll();
-  }, [data]);
+  }, [data, route]);
   const convertVND = (price) => {
     return func.convertVND(price);
+  };
+  const convertDate = (date) => {
+    return func.convertDate(date);
   };
   const fetchEquipment = () => {
     API.getEquipmentById(data)
       .then((res) => {
+        console.log('da vao');
         setProductDetail(res.data);
       })
       .catch((err) => {
         navigation.navigate("Equipment");
-        func.showMess(
-          "danger",
-          "Trang thiết bị không tồn tại!"
-        );
+        func.showMess("danger", "Trang thiết bị không tồn tại!");
       });
   };
   const prepareForBorrow = () => {
@@ -66,6 +70,9 @@ const EquipmentDetail = ({ navigation, route }) => {
         "danger",
         "Phải chọn 1 giáo viên để cho mượn trang thiết bị"
       );
+
+    if (selectedDate == "")
+      return func.showMess("danger", "Phải chọn ngày trả");
     API.borrowEquipment({
       equipment: {
         id: productDetail?.id,
@@ -73,7 +80,7 @@ const EquipmentDetail = ({ navigation, route }) => {
       },
       log: {
         userAccountId: selected,
-        returnedDealine: "2024-03-30T16:15:59.428Z",
+        returnedDealine: selectedDate,
       },
     })
       .then((res) => {
@@ -86,9 +93,46 @@ const EquipmentDetail = ({ navigation, route }) => {
       });
   };
 
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    setSelectedDate(date);
+    hideDatePicker();
+  };
+
   const cancelAll = () => {
     setTeachers([]);
     setSelected("");
+    setSelectedDate("");
+  };
+
+  const pickingDate = (e) => {
+    console.log(e);
+  };
+
+  const prepareForReturn = () => {
+    API.returnEquipment({
+      equipment: {
+        id: productDetail?.id,
+        roomId: null,
+      },
+      log: {
+        userAccountId: productDetail?.userAccountId,
+      },
+    })
+      .then((res) => {
+        func.showMess("success", res.data);
+        navigation.navigate("Equipment");
+      })
+      .catch((err) => {
+        func.showMess("danger", err.response?.data);
+      });
   };
 
   return (
@@ -110,8 +154,26 @@ const EquipmentDetail = ({ navigation, route }) => {
         Giá: {convertVND(productDetail?.price)}
       </Text>
       <Text style={{ fontSize: 18, marginLeft: 20, marginBottom: 10 }}>
-        Trạng thái: {productDetail?.status}
+        Trạng thái:{" "}
+        {productDetail?.status == "Borrowed"
+          ? "Đang mượn"
+          : productDetail?.status == "Returned"
+          ? "Trong kho"
+          : productDetail?.status == "Repair"
+          ? "Đang sửa"
+          : "Lỗi"}
       </Text>
+      {productDetail?.status == "Borrowed" ? (
+        <Text style={{ fontSize: 18, marginLeft: 20, marginBottom: 10 }}>
+          Giáo viên đang mượn: {productDetail?.userName}
+        </Text>
+      ) : null}
+
+      {productDetail?.status == "Borrowed" ? (
+        <Text style={{ fontSize: 18, marginLeft: 20, marginBottom: 10 }}>
+          Hạn trả: {convertDate(productDetail?.returnedDealine)}
+        </Text>
+      ) : null}
       <View
         style={{
           width: wp("100%"),
@@ -125,7 +187,14 @@ const EquipmentDetail = ({ navigation, route }) => {
             width: wp("90%"),
           }}
         >
-          <Button title="Cho mượn giáo viên mượn" onPress={prepareForBorrow} />
+          {productDetail?.status == "Borrowed" ? (
+            <Button title="Trả thiết bị" onPress={prepareForReturn} />
+          ) : (
+            <Button
+              title="Cho mượn giáo viên mượn"
+              onPress={prepareForBorrow}
+            />
+          )}
         </View>
       </View>
 
@@ -145,6 +214,46 @@ const EquipmentDetail = ({ navigation, route }) => {
               setSelected={(val) => setSelected(val)}
               data={teachers}
               save="userName"
+            />
+          </View>
+          <View
+            style={{
+              width: wp("100%"),
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingLeft: 20,
+              paddingRight: 20,
+              alignItems: "center",
+              marginTop: 10,
+            }}
+          >
+            <TouchableOpacity
+              onPress={showDatePicker}
+              style={{
+                width: wp("30%"),
+                borderWidth: 2,
+                borderColor: "gray",
+                borderStyle: "solid",
+                borderRadius: 20,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            >
+              <Text style={{ textAlign: "center", fontSize: 14 }}>
+                Chọn ngày trả
+              </Text>
+            </TouchableOpacity>
+            {selectedDate != "" ? (
+              <Text>Ngày trả: {convertDate(selectedDate)}</Text>
+            ) : (
+              <View></View>
+            )}
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="date"
+              onConfirm={handleConfirm}
+              onCancel={hideDatePicker}
             />
           </View>
           <View

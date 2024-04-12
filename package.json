@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.22.2",
+    "@react-native-community/datetimepicker": "7.2.0",
     "@react-navigation/bottom-tabs": "^6.5.12",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
@@ -25,7 +26,9 @@
     "react-native-calendars": "^1.1303.0",
     "react-native-dropdown-select-list": "^2.0.5",
     "react-native-flash-message": "^0.4.2",
+    "react-native-loading-spinner-overlay": "^3.0.1",
     "react-native-modal": "^13.0.1",
+    "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-responsive-screen": "^1.4.2",
     "react-native-vector-icons": "^10.0.3"
   },
