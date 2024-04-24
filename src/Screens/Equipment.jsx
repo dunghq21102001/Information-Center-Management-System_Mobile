@@ -19,6 +19,7 @@ import func from "../common/func";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import Spinner from "react-native-loading-spinner-overlay";
+import { SelectList } from "react-native-dropdown-select-list";
 
 const Equipment = ({ navigation, route }) => {
   const [originalEquipmentList, setOriginalEquipmentList] = useState([]);
@@ -28,14 +29,20 @@ const Equipment = ({ navigation, route }) => {
   const [isSwiping, setIsSwiping] = useState(false);
   const [showReloadIcon, setShowReloadIcon] = useState(false);
   const [reloadIconPosition, setReloadIconPosition] = useState({ x: 0, y: 0 });
+  const [selectedStatus, setSelectedStatus] = useState(1);
 
+  const listStatus = [
+    { key: 1, value: "Đang mượn", display: "Borrowed" },
+    { key: 2, value: "Trong kho", display: "Returned" },
+    { key: 3, value: "Sửa chữa", display: "Repair" },
+  ];
   useEffect(() => {
     fetchEquipment();
   }, []);
 
   const fetchEquipment = () => {
     setLoading(true);
-    API.getEquipment()
+    API.getEquipmentByStatus(selectedStatus)
       .then((res) => {
         setLoading(false);
         setEquipmentList(res.data);
@@ -44,6 +51,10 @@ const Equipment = ({ navigation, route }) => {
       .catch((err) => {
         setLoading(false);
       });
+  };
+
+  const fetchEquipmentAgain = () => {
+    fetchEquipment();
   };
 
   const convertVND = (price) => {
@@ -76,6 +87,7 @@ const Equipment = ({ navigation, route }) => {
       },
       onPanResponderRelease: () => {
         setIsSwiping(false);
+        setSelectedStatus(1);
         fetchEquipment();
         setShowReloadIcon(false);
         // setReloadIconPosition({ x: 0, y: 0 });
@@ -138,6 +150,23 @@ const Equipment = ({ navigation, route }) => {
         }}
       />
       <View style={{ width: wp("100%"), position: "relative" }}>
+        <View
+          style={{
+            width: wp("100%"),
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 20,
+          }}
+        >
+          <SelectList
+            boxStyles={{ width: wp("90%") }}
+            setSelected={(val) => setSelectedStatus(val)}
+            data={listStatus}
+            save="display"
+            onSelect={() => fetchEquipmentAgain()}
+          />
+        </View>
         <Text style={{ marginLeft: 20, fontSize: 16, marginTop: 30 }}>
           Danh sách trang thiết bị
         </Text>
@@ -179,6 +208,12 @@ const Equipment = ({ navigation, route }) => {
             <Ionicons name="reload" size={54} color="black" />
           </View>
         )}
+
+        {equipmentList.length == 0 ? (
+          <Text style={{ fontSize: 24, textAlign: "center" }}>
+            Không có thiết bị nào
+          </Text>
+        ) : null}
       </View>
 
       {/* modal */}

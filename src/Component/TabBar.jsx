@@ -73,7 +73,8 @@ function TabBar({ state, descriptors, navigation }) {
               label != "Security" &&
               label != "Children" &&
               label != "Equipment Detail" &&
-              label != 'CameraScan'
+              label != 'CameraScan' &&
+              label != 'Schedule'
                 ? { flex: 1, alignItems: "center" }
                 : { flex: 1, alignItems: "center", display: "none" }
             }

@@ -11,6 +11,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import func from "../common/func";
 import API from "../API";
 import { SelectList } from "react-native-dropdown-select-list";
@@ -23,11 +24,25 @@ const EquipmentDetail = ({ navigation, route }) => {
   const [selected, setSelected] = React.useState("");
   const [selectedDate, setSelectedDate] = React.useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [logData, setLogData] = useState(null);
 
   useEffect(() => {
     fetchEquipment();
     cancelAll();
+    getUserData();
+    fetchLog();
   }, [data, route]);
+
+  async function getUserData() {
+    try {
+      let data = await AsyncStorage.getItem("userData");
+      data = JSON.parse(data);
+      setUserData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const convertVND = (price) => {
     return func.convertVND(price);
   };
@@ -37,7 +52,6 @@ const EquipmentDetail = ({ navigation, route }) => {
   const fetchEquipment = () => {
     API.getEquipmentById(data)
       .then((res) => {
-        console.log('da vao');
         setProductDetail(res.data);
       })
       .catch((err) => {
@@ -47,6 +61,23 @@ const EquipmentDetail = ({ navigation, route }) => {
   };
   const prepareForBorrow = () => {
     getTeacherList();
+  };
+
+  const prepareForRepair = () => {
+    API.repairEquipment({
+      equipment: {
+        id: productDetail?.id,
+        roomId: null,
+      },
+      log: {
+        userAccountId: userData?.id,
+      },
+    })
+      .then((res) => {
+        navigation.navigate("Equipment");
+        func.showMess("success", "Đã đưa thiết bị đi sửa chữa");
+      })
+      .catch((err) => {});
   };
   const getTeacherList = () => {
     API.getTeacherList()
@@ -104,6 +135,14 @@ const EquipmentDetail = ({ navigation, route }) => {
   const handleConfirm = (date) => {
     setSelectedDate(date);
     hideDatePicker();
+  };
+
+  const fetchLog = () => {
+    API.logEquipmentById(data)
+      .then((res) => {
+        setLogData(res.data);
+      })
+      .catch((err) => {});
   };
 
   const cancelAll = () => {
@@ -190,10 +229,17 @@ const EquipmentDetail = ({ navigation, route }) => {
           {productDetail?.status == "Borrowed" ? (
             <Button title="Trả thiết bị" onPress={prepareForReturn} />
           ) : (
-            <Button
-              title="Cho mượn giáo viên mượn"
-              onPress={prepareForBorrow}
-            />
+            <View>
+              {productDetail?.status != "Repair" ? (
+                <Button
+                  title="Cho mượn giáo viên mượn"
+                  onPress={prepareForBorrow}
+                />
+              ) : null}
+              <View style={{ marginTop: 20 }}>
+                <Button title="Sửa chữa thiết bị" onPress={prepareForRepair} />
+              </View>
+            </View>
           )}
         </View>
       </View>
@@ -287,6 +333,60 @@ const EquipmentDetail = ({ navigation, route }) => {
           </View>
         </View>
       ) : null}
+
+      <View style={{ marginTop: 30 }}>
+        <Text
+          style={{
+            marginLeft: 20,
+            fontSize: 22,
+            marginTop: 30,
+            marginBottom: 10,
+            fontWeight: "bold",
+          }}
+        >
+          Lịch sử thiết bị
+        </Text>
+        <View style={styles.center}>
+          <FlatList
+            style={{ width: wp("100%"), height: hp("65%") }}
+            data={logData}
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  marginBottom: 15,
+                }}
+              >
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Text style={{ fontSize: 18, marginLeft: 10 }}>
+                    {item?.name}
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 12, marginLeft: 10 }}>
+                  Ngày mượn: {convertDate(item?.borrowedDate)} &ensp; - &ensp;
+                  Hạn trả: {convertDate(item?.returnedDealine)}
+                </Text>
+                <Text style={{ marginLeft: 10, fontSize: 16 }}>
+                  Trạng thái:{" "}
+                  {item?.status == "Borrowed"
+                    ? "Mượn"
+                    : item?.status == "Returned"
+                    ? "Trả"
+                    : item?.status == "Repair"
+                    ? "Sửa lỗi"
+                    : "Lỗi"}
+                </Text>
+              </View>
+            )}
+          />
+        </View>
+      </View>
     </View>
   );
 };
@@ -308,5 +408,11 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingTop: 10,
     marginLeft: 10,
+  },
+  center: {
+    width: wp("100%"),
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });

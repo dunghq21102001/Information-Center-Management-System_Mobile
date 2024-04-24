@@ -18,9 +18,12 @@ const Login = ({ navigation, setIsLoggedIn }) => {
           AsyncStorage.setItem("userData", JSON.stringify(res.data));
           AsyncStorage.setItem("isLoggedIn", "true");
           func.showMess("success", "Đăng nhập thành công");
+          // console.log('a');
           setIsLoggedIn(true);
         })
         .catch((err) => {
+          // console.log();
+
           func.showMess("danger", err.response?.data);
         });
     } catch (error) {

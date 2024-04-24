@@ -99,7 +99,7 @@ const Profile = ({ navigation, route, logout }) => {
             }}
           />
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => {
             goTo("Children");
           }}
@@ -123,7 +123,7 @@ const Profile = ({ navigation, route, logout }) => {
               transform: [{ translateY: -8 }],
             }}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={logout} style={styles.listItem}>
           <AntDesign
             style={[styles.listItemIcon, { backgroundColor: "#e4e4e4" }]}
