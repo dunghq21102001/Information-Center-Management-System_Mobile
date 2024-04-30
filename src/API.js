@@ -1,4 +1,6 @@
 import axios from "axios"
+import axiosInstance from "./AxiosInstance";
+
 
 export default class API {
     static BASE_URL = 'https://kidproeduservicesv2.azurewebsites.net/api'
@@ -12,23 +14,23 @@ export default class API {
     }
 
     static getEquipment() {
-        return axios.get(`${this.BASE_URL}/Equipment/Equipments`)
+        return axiosInstance.get(`${this.BASE_URL}/Equipment/Equipments`)
     }
 
     static getEquipmentById(id) {
-        return axios.get(`${this.BASE_URL}/Equipment/${id}`)
+        return axiosInstance.get(`${this.BASE_URL}/Equipment/${id}`)
     }
 
     static borrowEquipment(data) {
-        return axios.post(`${this.BASE_URL}/Equipment/EquipmentBorrowedManagement`, data)
+        return axiosInstance.post(`${this.BASE_URL}/Equipment/EquipmentBorrowedManagement`, data)
     }
 
     static returnEquipment(data) {
-        return axios.post(`${this.BASE_URL}/Equipment/EquipmentReturnedManagement`, data)
+        return axiosInstance.post(`${this.BASE_URL}/Equipment/EquipmentReturnedManagement`, data)
     }
 
     static repairEquipment(data) {
-        return axios.post(`${this.BASE_URL}/Equipment/EquipmentRepairManagement`, data)
+        return axiosInstance.post(`${this.BASE_URL}/Equipment/EquipmentRepairManagement`, data)
     }
 
     static getTeacherList() {
@@ -36,10 +38,10 @@ export default class API {
     }
 
     static getEquipmentByStatus(status) {
-        return axios.get(`${this.BASE_URL}/Equipment/EquipmentsByStatus/${status}`)
+        return axiosInstance.get(`${this.BASE_URL}/Equipment/EquipmentsByStatus/${status}`)
     }
 
     static logEquipmentById(id) {
-        return axios.get(`${this.BASE_URL}/LogEquipment/LogEquipmentsByEquipment/${id}`)
+        return axiosInstance.get(`${this.BASE_URL}/LogEquipment/LogEquipmentsByEquipment/${id}`)
     }
 }

@@ -20,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import Spinner from "react-native-loading-spinner-overlay";
 import { SelectList } from "react-native-dropdown-select-list";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Equipment = ({ navigation, route }) => {
   const [originalEquipmentList, setOriginalEquipmentList] = useState([]);
@@ -30,6 +31,7 @@ const Equipment = ({ navigation, route }) => {
   const [showReloadIcon, setShowReloadIcon] = useState(false);
   const [reloadIconPosition, setReloadIconPosition] = useState({ x: 0, y: 0 });
   const [selectedStatus, setSelectedStatus] = useState(1);
+  const [userData, setUserData] = useState(null);
 
   const listStatus = [
     { key: 1, value: "Đang mượn", display: "Borrowed" },
@@ -37,11 +39,13 @@ const Equipment = ({ navigation, route }) => {
     { key: 3, value: "Sửa chữa", display: "Repair" },
   ];
   useEffect(() => {
+    getUserData()
     fetchEquipment();
   }, []);
 
   const fetchEquipment = () => {
     setLoading(true);
+  
     API.getEquipmentByStatus(selectedStatus)
       .then((res) => {
         setLoading(false);
@@ -49,9 +53,20 @@ const Equipment = ({ navigation, route }) => {
         setOriginalEquipmentList(res.data);
       })
       .catch((err) => {
+        console.log(err);
         setLoading(false);
       });
   };
+
+  async function getUserData() {
+    try {
+      let data = await AsyncStorage.getItem("userData");
+      data = JSON.parse(data);
+      setUserData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const fetchEquipmentAgain = () => {
     fetchEquipment();

@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API from "../API";
 import func from "../common/func";
@@ -15,10 +22,15 @@ const Login = ({ navigation, setIsLoggedIn }) => {
         password: password,
       })
         .then((res) => {
+          if (res.data?.roleName != "Manager")
+            return func.showMess(
+              "danger",
+              "Chỉ có quản lý mới có thể đăng nhập"
+            );
           AsyncStorage.setItem("userData", JSON.stringify(res.data));
           AsyncStorage.setItem("isLoggedIn", "true");
           func.showMess("success", "Đăng nhập thành công");
-          // console.log('a');
+          console.log(res.data);
           setIsLoggedIn(true);
         })
         .catch((err) => {

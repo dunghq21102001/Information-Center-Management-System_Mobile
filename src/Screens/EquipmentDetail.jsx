@@ -47,7 +47,9 @@ const EquipmentDetail = ({ navigation, route }) => {
     return func.convertVND(price);
   };
   const convertDate = (date) => {
-    return func.convertDate(date);
+    let d = func.convertDate(date);
+    if (d == "1/1/1970, 7:00:00 AM") return "";
+    else return d;
   };
   const fetchEquipment = () => {
     API.getEquipmentById(data)
@@ -65,13 +67,16 @@ const EquipmentDetail = ({ navigation, route }) => {
 
   const prepareForRepair = () => {
     API.repairEquipment({
-      equipment: {
-        id: productDetail?.id,
-        roomId: null,
-      },
-      log: {
-        userAccountId: userData?.id,
-      },
+      // equipment: {
+      //   id: productDetail?.id,
+      //   roomId: null,
+      // },
+      // log: {
+      //   userAccountId: userData?.id,
+      // },
+      equipmentId: productDetail?.id,
+      roomId: null,
+      userAccountId: userData?.id,
     })
       .then((res) => {
         navigation.navigate("Equipment");
@@ -105,14 +110,18 @@ const EquipmentDetail = ({ navigation, route }) => {
     if (selectedDate == "")
       return func.showMess("danger", "Phải chọn ngày trả");
     API.borrowEquipment({
-      equipment: {
-        id: productDetail?.id,
-        roomId: null,
-      },
-      log: {
-        userAccountId: selected,
-        returnedDealine: selectedDate,
-      },
+      // equipment: {
+      //   id: productDetail?.id,
+      //   roomId: null,
+      // },
+      // log: {
+      //   userAccountId: selected,
+      //   returnedDealine: selectedDate,
+      // },
+      equipmentId: productDetail?.id,
+      roomId: null,
+      userAccountId: selected,
+      returnedDealine: selectedDate,
     })
       .then((res) => {
         func.showMess("success", "Cho mượn trang thiết bị thành công");
@@ -155,18 +164,36 @@ const EquipmentDetail = ({ navigation, route }) => {
     console.log(e);
   };
 
-  const prepareForReturn = () => {
+  const returnedEquipment = () => {
     API.returnEquipment({
-      equipment: {
-        id: productDetail?.id,
-        roomId: null,
-      },
-      log: {
-        userAccountId: productDetail?.userAccountId,
-      },
+      // equipment: {
+      //   id: productDetail?.id,
+      //   roomId: null,
+      // },
+      // log: {
+      //   userAccountId: productDetail?.userAccountId,
+      // },
+      equipmentId: productDetail?.id,
+      roomId: null,
+      userAccountId: productDetail?.userAccountId,
     })
       .then((res) => {
         func.showMess("success", res.data);
+        navigation.navigate("Equipment");
+      })
+      .catch((err) => {
+        func.showMess("danger", err.response?.data);
+      });
+  };
+
+  const prepareForReturn = () => {
+    API.returnEquipment({
+      equipmentId: productDetail?.id,
+      roomId: null,
+      userAccountId: userData?.id,
+    })
+      .then((res) => {
+        func.showMess("success", "Trả thiết bị về kho thành công");
         navigation.navigate("Equipment");
       })
       .catch((err) => {
@@ -236,9 +263,21 @@ const EquipmentDetail = ({ navigation, route }) => {
                   onPress={prepareForBorrow}
                 />
               ) : null}
-              <View style={{ marginTop: 20 }}>
-                <Button title="Sửa chữa thiết bị" onPress={prepareForRepair} />
-              </View>
+              {productDetail?.status == "Repair" ? (
+                <View style={{ marginTop: 20 }}>
+                  <Button
+                    title="Trả thiết bị về kho"
+                    onPress={returnedEquipment}
+                  />
+                </View>
+              ) : (
+                <View style={{ marginTop: 20 }}>
+                  <Button
+                    title="Sửa chữa thiết bị"
+                    onPress={prepareForRepair}
+                  />
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -368,10 +407,12 @@ const EquipmentDetail = ({ navigation, route }) => {
                     {item?.name}
                   </Text>
                 </View>
-                <Text style={{ fontSize: 12, marginLeft: 10 }}>
-                  Ngày mượn: {convertDate(item?.borrowedDate)} &ensp; - &ensp;
-                  Hạn trả: {convertDate(item?.returnedDealine)}
-                </Text>
+                {item?.status == "Repair" ? null : (
+                  <Text style={{ fontSize: 12, marginLeft: 10 }}>
+                    Ngày mượn: {convertDate(item?.borrowedDate)} &ensp; - &ensp;
+                    Hạn trả: {convertDate(item?.returnedDealine)}
+                  </Text>
+                )}
                 <Text style={{ marginLeft: 10, fontSize: 16 }}>
                   Trạng thái:{" "}
                   {item?.status == "Borrowed"
